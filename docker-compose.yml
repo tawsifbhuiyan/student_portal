@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: password  # Set the root password for MariaDB
+      MYSQL_DATABASE: student_portal_db  # Name of the database
+    volumes:
+      - db_data:/var/lib/mysql  # Persist database data
+    networks:
+      - student_network
+
+  web:
+    build: .  # Build the Django application from the Dockerfile
+    command: python manage.py migrate && python manage.py runserver 0.0.0.0:8000  # Run migrations and start the server
+    volumes:
+      - .:/app  # Mount the current directory to /app in the container
+    ports:
+      - "8000:8000"  # Expose port 8000 to access the app in the browser
+    depends_on:
+      - db  # Ensure the web service waits for the db service to be ready
+    networks:
+      - student_network
+
+volumes:
+  db_data:  # Volume to store MariaDB data persistently
+
+networks:
+  student_network:  # Create a custom network for the services to communicate
